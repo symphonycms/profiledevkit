@@ -5,7 +5,9 @@
 	class Content_ProfileDevKit extends DevKit {
 		protected $_view = '';
 		protected $_xsl = '';
+		protected $_profiler = null;
 		protected $_records = array();
+		protected $_dbstats = array();
 		
 		public function __construct(){
 			parent::__construct();
@@ -18,9 +20,31 @@
 			}
 		}
 		
-		protected function appendJump() {
+		public function build() {
+			$this->_view = (strlen(trim($_GET['profile'])) == 0 ? 'general' : $_GET['profile']);
+			$this->_xsl = @file_get_contents($this->_pagedata['filelocation']);
+			
+			// Build statistics:
+			$this->_profiler = $this->_page->_Parent->Profiler;
+			$this->_dbstats = $this->_page->_Parent->Database->getStatistics();
+			$this->_records = array(
+				'general'			=> $this->_profiler->retrieveGroup('General'),
+				'data-sources'		=> $this->_profiler->retrieveGroup('Datasource'),
+				'events'			=> $this->_profiler->retrieveGroup('Event'),
+				'slow-queries'		=> array()
+			);
+			
+			if (is_array($this->_dbstats['slow-queries']) && !empty($this->_dbstats['slow-queries'])) {
+				foreach ($this->_dbstats['slow-queries'] as $q) {
+					$this->_records['slow-queries'][] = array($q['time'], $q['query'], null, null, false);
+				}
+			}
+			
+			return parent::build();
+		}
+		
+		protected function buildJump($wrapper) {
 			$list = new XMLElement('ul');
-			$list->setAttribute('id', 'jump');
 			
 			if (is_array($this->_records['general']) && !empty($this->_records['general'])) {
 				$list->appendChild($this->buildJumpItem(
@@ -60,88 +84,67 @@
 				));
 			}
 			
-			$this->Body->appendChild($list);
+			$wrapper->appendChild($list);
 		}
 		
-		public function appendContent() {
-			$this->_view = (strlen(trim($_GET['profile'])) == 0 ? 'general' : $_GET['profile']);
-			$this->_xsl = @file_get_contents($this->_pagedata['filelocation']);
+		public function buildContent($wrapper) {
+			$this->addStylesheetToHead(URL . '/extensions/profiledevkit/assets/devkit.css', 'screen', 9126343);
 			
-			// Build statistics:
-			$profiler = $this->_page->_Parent->Profiler;
-			$dbstats = $this->_page->_Parent->Database->getStatistics();
-			$this->_records = array(
-				'general'			=> $profiler->retrieveGroup('General'),
-				'data-sources'		=> $profiler->retrieveGroup('Datasource'),
-				'events'			=> $profiler->retrieveGroup('Event'),
-				'slow-queries	'	=> array()
-			);
+			$table = new XMLElement('table');
+			$table->setAttribute('id', $this->_view);
 			
-			if (is_array($dbstats['slow-queries']) && !empty($dbstats['slow-queries'])) {
-				foreach ($dbstats['slow-queries'] as $q) {
-					$records['slow-queries'][] = array($q['time'], $q['query'], null, null, false);
-				}
-			}
-			
-			$this->appendHeader();
-			$this->appendNavigation();
-			$this->appendJump();
-			
-			// Full render statistics:
 			if ($this->_view == 'render-statistics') {
-				$xml_generation = $profiler->retrieveByMessage('XML Generation');
-				$xsl_transformation = $profiler->retrieveByMessage('XSLT Transformation');
+				$xml_generation = $this->_profiler->retrieveByMessage('XML Generation');
+				$xsl_transformation = $this->_profiler->retrieveByMessage('XSLT Transformation');
 				
 				$event_total = 0;
-				foreach ($records['events'] as $r) $event_total += $r[1];
+				foreach ($this->_records['events'] as $data) $event_total += $data[1];
 				
 				$ds_total = 0;
-				foreach ($records['data-sources'] as $r) $ds_total += $r[1];
+				foreach ($this->_records['data-sources'] as $data) $ds_total += $data[1];
 				
-				$records = array(
-					array(__('Total Database Queries'), $dbstats['queries'], NULL, NULL, false),
-					array(__('Slow Queries (> 0.09s)'), count($dbstats['slow-queries']), NULL, NULL, false),
-					array(__('Total Time Spent on Queries'), $dbstats['total-query-time']),
+				$this->_records = array(
+					array(__('Total Database Queries'), $this->_dbstats['queries'], NULL, NULL, false),
+					array(__('Slow Queries (> 0.09s)'), count($this->_dbstats['slow-queries']), NULL, NULL, false),
+					array(__('Total Time Spent on Queries'), $this->_dbstats['total-query-time']),
 					array(__('Time Triggering All Events'), $event_total),
 					array(__('Time Running All Data Sources'), $ds_total),
 					array(__('XML Generation Function'), $xml_generation[1]),
 					array(__('XSLT Generation'), $xsl_transformation[1]),
-					array(__('Output Creation Time'), $profiler->retrieveTotalRunningTime()),
+					array(__('Output Creation Time'), $this->_profiler->retrieveTotalRunningTime()),
 				);
 				
-				$dl = new XMLElement('dl', NULL, array('id' => 'render-statistics'));
-				
-				foreach ($records as $r) {
-					$dl->appendChild(new XMLElement('dt', $r[0]));
-					$dl->appendChild(new XMLElement('dd', $r[1] . (isset($r[4]) && $r[4] == false ? '' : ' s')));
+				foreach ($this->_records as $data) {
+					$row = new XMLElement('tr');
+					$row->appendChild(new XMLElement('th', $data[0]));
+					$row->appendChild(new XMLElement('td', $data[1] . (isset($data[4]) && $data[4] == false ? '' : ' s')));
+					$table->appendChild($row);
 				}
 				
-				$this->Body->appendChild($dl);
 				
-			} else if ($records = $this->_records[$this->_view]) {
+			} else if ($this->_records = $this->_records[$this->_view]) {
 				$ds_total = 0;
 				
-				$dl = new XMLElement('dl');
-				$dl->setAttribute('id', $this->_view);
-				
-				foreach ($records as $r) {
-					$dl->appendChild(new XMLElement('dt', $r[0]));
+				foreach ($this->_records as $data) {
+					$row = new XMLElement('tr');
+					$row->appendChild(new XMLElement('th', $data[0]));
 					
 					if ($this->_view == 'general') {
-						$dl->appendChild(new XMLElement('dd', $r[1] . ' s'));
+						$row->appendChild(new XMLElement('td', $data[1] . ' s'));
 						
 					} else if ($this->_view == 'slow-queries') {
-						$dl->appendChild(new XMLElement('dd', $r[1] . (isset($r[4]) && $r[4] == false ? '' : ' s')));
+						$row->appendChild(new XMLElement('td', $data[1] . (isset($data[4]) && $data[4] == false ? '' : ' s')));
 						
 					} else {
-						$dl->appendChild(new XMLElement('dd', $r[1] . ' s from ' . $r[4] . ' ' . ($r[4] == 1 ? 'query' : 'queries')));
+						$row->appendChild(new XMLElement('td', $data[1] . ' s from ' . $data[4] . ' ' . ($data[4] == 1 ? 'query' : 'queries')));
 					}
 					
-					$ds_total += $r[1];
+					$ds_total += $data[1];
+					$table->appendChild($row);
 				}
-				
-				$this->Body->appendChild($dl);
 			}
+			
+			$wrapper->appendChild($table);
 		}
 	}
 	
