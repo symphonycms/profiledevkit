@@ -76,6 +76,12 @@
 				($this->_view == 'render-statistics')
 			));
 			
+			$list->appendChild($this->buildJumpItem(
+				__('Memory Usage'),
+				'?profile=memory-usage' . $this->_query_string,
+				($this->_view == 'memory-usage')
+			));
+			
 			if (is_array($this->_records['slow-queries']) && !empty($this->_records['slow-queries'])) {
 				$list->appendChild($this->buildJumpItem(
 					__('Slow Query Details'),
@@ -112,6 +118,7 @@
 					array(__('XML Generation Function'), $xml_generation[1]),
 					array(__('XSLT Generation'), $xsl_transformation[1]),
 					array(__('Output Creation Time'), $this->_profiler->retrieveTotalRunningTime()),
+					array(__('Total Memory Usage'), General::formatFilesize($this->_profiler->retrieveTotalMemoryUsage()), NULL, NULL, false),
 				);
 				
 				foreach ($this->_records as $data) {
@@ -122,7 +129,27 @@
 				}
 				
 				
-			} else if ($this->_records = $this->_records[$this->_view]) {
+			} 
+			
+			elseif($this->_view == 'memory-usage'){
+				$items = $this->_profiler->retrieve();
+			
+				$base = $items[0][5];
+				$total = 0;
+				$last = 0;
+			
+				foreach($items as $index => $item){
+
+					$row = new XMLElement('tr');
+					$row->appendChild(new XMLElement('th', $item[0]));
+					$row->appendChild(new XMLElement('td', General::formatFilesize(max(0, (($item[5]-$base) - $last)))));
+					$table->appendChild($row);
+					
+					$last = $item[5]-$base;
+				}
+			}
+			
+			else if ($this->_records = $this->_records[$this->_view]) {
 				$ds_total = 0;
 				
 				foreach ($this->_records as $data) {
