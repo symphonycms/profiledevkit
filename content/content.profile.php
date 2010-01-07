@@ -149,7 +149,7 @@
 				foreach($items as $index => $item){
 
 					$row = new XMLElement('tr');
-					$row->appendChild(new XMLElement('th', $item[0]));
+					$row->appendChild(new XMLElement('th', ((in_array($item[3], array('Datasource','Event'))) ? $item[3] . ': ' : '') . $item[0]));
 					$row->appendChild(new XMLElement('td', General::formatFilesize(max(0, (($item[5]-$base) - $last)))));
 					$table->appendChild($row);
 					
