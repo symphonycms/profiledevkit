@@ -82,6 +82,14 @@
 				($this->_view == 'memory-usage')
 			));
 			
+			if(is_object(Symphony::Database())){				
+				$list->appendChild($this->buildJumpItem(
+					__('Database Queries'),
+					'?profile=database-queries' . $this->_query_string,
+					($this->_view == 'database-queries')
+				));
+			}
+			
 			if (is_array($this->_records['slow-queries']) && !empty($this->_records['slow-queries'])) {
 				$list->appendChild($this->buildJumpItem(
 					__('Slow Query Details'),
@@ -147,6 +155,24 @@
 					
 					$last = $item[5]-$base;
 				}
+			}
+			
+			elseif($this->_view == 'database-queries'){
+				
+				$debug = Symphony::Database()->debug();
+
+				if(count($debug['query']) > 0){
+					$i = 1;
+					foreach($debug['query'] as $query){
+						$row = new XMLElement('tr');
+						$row->appendChild(new XMLElement('th', $i));
+						$row->appendChild(new XMLElement('td', $query['time']));
+						$row->appendChild(new XMLElement('td', $query['query']));
+						$table->appendChild($row);
+						$i++;
+					}
+				}
+			
 			}
 			
 			else if ($this->_records = $this->_records[$this->_view]) {
