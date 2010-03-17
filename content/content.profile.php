@@ -13,7 +13,7 @@
 			parent::__construct();
 			
 			$this->_title = __('Profile');
-			$this->_query_string = parent::__buildQueryString(array('profile'));
+			$this->_query_string = parent::__buildQueryString(array('symphony-page', 'profile'));
 			
 			if (!empty($this->_query_string)) {
 				$this->_query_string = '&amp;' . General::sanitize($this->_query_string);
