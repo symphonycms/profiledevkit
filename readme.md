@@ -1,4 +1,4 @@
-# Debug Devkit #
+# Profile Devkit #
 
 A profile panel for Symphony.
 It is part of the Symphony core download package.
