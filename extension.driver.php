@@ -9,9 +9,9 @@
 		
 		public function about() {
 			return array(
-				'name'			=> 'Profile DevKit',
-				'version'		=> '1.0.3',
-				'release-date'	=> '2010-01-07',
+				'name'			=> 'Profile Devkit',
+				'version'		=> '1.0.4',
+				'release-date'	=> '2010-03-19',
 				'author'		=> array(
 					'name'			=> 'Rowan Lewis',
 					'website'		=> 'http://rowanlewis.com/',
