@@ -25,8 +25,8 @@
 			$this->_xsl = @file_get_contents($this->_pagedata['filelocation']);
 			
 			// Build statistics:
-			$this->_profiler = $this->_page->_Parent->Profiler;
-			$this->_dbstats = $this->_page->_Parent->Database->getStatistics();
+			$this->_profiler = Frontend::instance()->Profiler;
+			$this->_dbstats = Symphony::Database()->getStatistics();
 			$this->_records = array(
 				'general'			=> $this->_profiler->retrieveGroup('General'),
 				'data-sources'		=> $this->_profiler->retrieveGroup('Datasource'),
