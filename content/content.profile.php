@@ -119,7 +119,7 @@
 				
 				$this->_records = array(
 					array(__('Total Database Queries'), $this->_dbstats['queries'], NULL, NULL, false),
-					array(__('Slow Queries (> 0.09s)'), count($this->_dbstats['slow-queries']), NULL, NULL, false),
+					array(__('Slow Queries (> 0.09s)'), (string)count($this->_dbstats['slow-queries']), NULL, NULL, false),
 					array(__('Total Time Spent on Queries'), $this->_dbstats['total-query-time']),
 					array(__('Time Triggering All Events'), $event_total),
 					array(__('Time Running All Data Sources'), $ds_total),
@@ -130,9 +130,14 @@
 				);
 				
 				foreach ($this->_records as $data) {
+					
+					if(!isset($data[4]) || $data[4] !== false){
+						$data[1] = number_format($data[1], 4) . ' s';
+					}
+					
 					$row = new XMLElement('tr');
 					$row->appendChild(new XMLElement('th', $data[0]));
-					$row->appendChild(new XMLElement('td', $data[1] . (isset($data[4]) && $data[4] == false ? '' : ' s')));
+					$row->appendChild(new XMLElement('td', $data[1]));
 					$table->appendChild($row);
 				}
 				
@@ -166,7 +171,7 @@
 					foreach($debug['query'] as $query){
 						$row = new XMLElement('tr');
 						$row->appendChild(new XMLElement('th', $i));
-						$row->appendChild(new XMLElement('td', $query['time']));
+						$row->appendChild(new XMLElement('td', number_format($query['time'], 4)));
 						$row->appendChild(new XMLElement('td', $query['query']));
 						$table->appendChild($row);
 						$i++;
@@ -183,13 +188,20 @@
 					$row->appendChild(new XMLElement('th', $data[0]));
 					
 					if ($this->_view == 'general') {
-						$row->appendChild(new XMLElement('td', $data[1] . ' s'));
+						$row->appendChild(new XMLElement('td', number_format($data[1], 4) . ' s'));
 						
-					} else if ($this->_view == 'slow-queries') {
-						$row->appendChild(new XMLElement('td', $data[1] . (isset($data[4]) && $data[4] == false ? '' : ' s')));
+					} 
+					elseif ($this->_view == 'slow-queries') {
 						
-					} else {
-						$row->appendChild(new XMLElement('td', $data[1] . ' s from ' . $data[4] . ' ' . ($data[4] == 1 ? 'query' : 'queries')));
+						if(!isset($data[4]) || $data[4] !== false){
+							$data[1] = number_format($data[1], 4) . ' s';
+						}
+						
+						$row->appendChild(new XMLElement('td', $data[1]));
+						
+					} 
+					else {
+						$row->appendChild(new XMLElement('td', number_format($data[1], 4) . ' s from ' . $data[4] . ' ' . ($data[4] == 1 ? 'query' : 'queries')));
 					}
 					
 					$ds_total += $data[1];
