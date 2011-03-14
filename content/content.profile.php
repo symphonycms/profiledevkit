@@ -172,8 +172,8 @@
 						$row = new XMLElement('tr');
 						$row->appendChild(new XMLElement('th', $i));
 						$row->appendChild(new XMLElement('td', number_format($query['time'], 4)));
-						$td = new XMLElement('td');
-						$td->appendChild($td->ownerDocument->createCDATASection($query['query']));
+						$td = XMLElement::getDocument()->createElement('td');
+						$td->appendChild(XMLElement::getDocument()->createCDATASection($query['query']));
 						$row->appendChild($td);
 						$table->appendChild($row);
 						$i++;
