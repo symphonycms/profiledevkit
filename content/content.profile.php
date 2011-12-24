@@ -162,9 +162,9 @@
 
 				$debug = Symphony::Database()->debug();
 
-				if(count($debug['query']) > 0){
+				if(count($debug) > 0){
 					$i = 1;
-					foreach($debug['query'] as $query){
+					foreach($debug as $query){
 						$row = new XMLElement('tr');
 						$row->appendChild(new XMLElement('th', $i));
 						$row->appendChild(new XMLElement('td', number_format($query['time'], 4)));
