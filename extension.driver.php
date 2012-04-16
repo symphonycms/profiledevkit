@@ -10,8 +10,8 @@
 		public function about() {
 			return array(
 				'name'			=> 'Profile Devkit',
-				'version'		=> '1.0.4',
-				'release-date'	=> '2010-03-19',
+				'version'		=> '1.0.5',
+				'release-date'	=> '2012-04-16',
 				'author'		=> array(
 					'name'			=> 'Rowan Lewis',
 					'website'		=> 'http://rowanlewis.com/',
@@ -54,5 +54,3 @@
 			$xml->documentElement->appendChild($item);
 		}
 	}
-	
-?>

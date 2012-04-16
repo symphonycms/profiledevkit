@@ -208,5 +208,3 @@
 			$wrapper->appendChild($table);
 		}
 	}
-
-?>
