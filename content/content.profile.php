@@ -27,6 +27,7 @@
 				'general'			=> Symphony::Profiler()->retrieveGroup('General'),
 				'data-sources'		=> Symphony::Profiler()->retrieveGroup('Datasource'),
 				'events'			=> Symphony::Profiler()->retrieveGroup('Event'),
+				'delegates'			=> Symphony::Profiler()->retrieveGroup('Delegate'),
 				'slow-queries'		=> array()
 			);
 
@@ -63,6 +64,14 @@
 					__('Event Execution'),
 					'?profile=events' . $this->_query_string,
 					($this->_view == 'events')
+				));
+			}
+
+			if (is_array($this->_records['delegates']) && !empty($this->_records['delegates'])) {
+				$list->appendChild($this->buildJumpItem(
+					__('Delegate Execution'),
+					'?profile=delegates' . $this->_query_string,
+					($this->_view == 'delegates')
 				));
 			}
 
@@ -136,11 +145,9 @@
 					$row->appendChild(new XMLElement('td', $data[1]));
 					$table->appendChild($row);
 				}
-
-
 			}
 
-			elseif($this->_view == 'memory-usage'){
+			else if($this->_view == 'memory-usage'){
 				$items = Symphony::Profiler()->retrieve();
 
 				$base = $items[0][5];
@@ -148,7 +155,6 @@
 				$last = 0;
 
 				foreach($items as $index => $item){
-
 					$row = new XMLElement('tr');
 					$row->appendChild(new XMLElement('th', ((in_array($item[3], array('Datasource','Event'))) ? $item[3] . ': ' : '') . $item[0]));
 					$row->appendChild(new XMLElement('td', General::formatFilesize(max(0, (($item[5]-$base) - $last)))));
@@ -158,8 +164,7 @@
 				}
 			}
 
-			elseif($this->_view == 'database-queries'){
-
+			else if($this->_view == 'database-queries'){
 				$debug = Symphony::Database()->debug();
 
 				if(count($debug) > 0){
@@ -173,7 +178,38 @@
 						$i++;
 					}
 				}
+			}
 
+			else if ($this->_view == 'delegates') {
+				$delegates = array();
+
+				// Build an array of delegate => extensions
+				foreach ($this->_records['delegates'] as $data) {
+					$parts = explode('|', $data[0]);
+					$data[0] = $parts[1];
+					$delegates[$parts[0]][] = $data;
+				}
+
+				foreach($delegates as $delegate => $extensions) {
+					$tt = 0;
+					$row = new XMLElement('tr');
+					$row->appendChild(new XMLElement('th', $delegate));
+					$table->appendChild($row);
+
+					foreach($extensions as $extension) {
+						$execution_time = number_format($extension[1], 4);
+						$extension_row = new XMLElement('tr');
+						// Poor man's grouping.
+						$extension_row->appendChild(new XMLElement('td', '&nbsp;'));
+						$extension_row->appendChild(new XMLElement('th', $extension[0]));
+						$extension_row->appendChild(new XMLElement('td', $execution_time . ' s from ' . $extension[4] . ' ' . ($extension[4] == 1 ? 'query' : 'queries')));
+
+						$table->appendChild($extension_row);
+						$tt += $execution_time;
+					}
+
+					$row->appendChild(new XMLElement('td', number_format($tt, 4) . ' s'));
+				}
 			}
 
 			else if ($this->_records = $this->_records[$this->_view]) {
