@@ -210,27 +210,18 @@
 					$table->appendChild($row);
 
 					foreach($extensions as $extension) {
-						//var_dump($extension);
 						$execution_time = number_format($extension[1], 4);
 						$extension_row = new XMLElement('tr');
+
 						// Poor man's grouping.
 						$extension_row->appendChild(new XMLElement('td', '&nbsp;'));
 						$extension_row->appendChild(new XMLElement('th', $extension[0]));
-						$extension_row->appendChild(new XMLElement('td', $execution_time . ' s from ' . count($extension[4]) . ' ' . ($extension[4] == 1 ? 'query' : 'queries')));
+						$extension_row->appendChild(new XMLElement('td', $execution_time . ' s from ' . $extension[4] . ' ' . ($extension[4] == 1 ? 'query' : 'queries')));
 
 						$table->appendChild($extension_row);
 						$tt += $execution_time;
 						$tq += (is_array($extension[4])) ? count($extension[4]) : $extension[4];
 						if(!in_array($extension[0], $te)) $te[] = $extension[0];
-
-						if(is_array($extension[4])) {
-							foreach($extension[4] as $query) {
-								$query_row = new XMLElement('tr');
-								$query_row->appendChild(new XMLElement('th', $query['execution_time']));
-								$query_row->appendChild(new XMLElement('td', $query['query']));
-								$table->appendChild($query_row);
-							}
-						}
 					}
 
 					$row->appendChild(new XMLElement('td', number_format($tt, 4) . ' s from ' . count($te) . ' extensions and ' . $tq . ' ' . ($tq == 1 ? 'query' : 'queries')));
