@@ -40,7 +40,7 @@
 			return parent::build();
 		}
 
-		protected function buildJump($wrapper) {
+		protected function buildJump(XMLElement $wrapper) {
 			$list = new XMLElement('ul');
 
 			if (is_array($this->_records['general']) && !empty($this->_records['general'])) {
@@ -106,7 +106,7 @@
 			$wrapper->appendChild($list);
 		}
 
-		public function buildContent($wrapper) {
+		public function buildContent(XMLElement $wrapper) {
 			$this->addStylesheetToHead(URL . '/extensions/profiledevkit/assets/devkit.css', 'screen', 9126343);
 
 			$table = new XMLElement('table');
