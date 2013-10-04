@@ -2,10 +2,9 @@
 
 A profile panel for Symphony. It is part of the Symphony core download package.
 
-- Version: 1.3
-- Author: Rowan Lewis, Symphony Team
-- Date: 1 July 2013
-- Requirements: Symphony 2.3 or greater
+- Version: 1.4
+- Date: 4th October 2013
+- Requirements: Symphony 2.3 or later
 
 ## Usage
 
