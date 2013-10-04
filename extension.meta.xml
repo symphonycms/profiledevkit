@@ -19,6 +19,9 @@
 		</author>
 	</authors>
 	<releases>
+		<release version="1.3" date="2013-10-04" min="2.3">
+			- Correctly report database query execution times
+		</release>
 		<release version="1.2" date="2013-02-22" min="2.3">
 			- Allowed Delegate Profiling (2.3.2+ only)
 			- Update Russian language
