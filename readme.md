@@ -2,10 +2,6 @@
 
 A profile panel for Symphony. It is part of the Symphony core download package.
 
-- Version: 1.4
-- Date: 4th October 2013
-- Requirements: Symphony 2.3 or later
-
 ## Usage
 
 Append `?profile` to your front-end pages when logged in to initialise this Devkit. The Profile Devkit responds to the following URL's:
