@@ -25,7 +25,11 @@
 		public function frontendDevKitResolve($context) {
 			if (isset($_GET['profile'])) {
 				require_once(EXTENSIONS . '/profiledevkit/content/content.profile.php');
-				
+
+				if ($_GET['profile'] === 'xslt') {
+					Frontend::Page()->Proc->setProfiling(TMP . '/xslt.profile');
+				}
+
 				$context['devkit'] = new Content_ProfileDevkit();
 				self::$active = true;
 			}

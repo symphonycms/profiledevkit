@@ -18,7 +18,7 @@
 			}
 		}
 
-		public function build() {
+		public function build(array $context = []) {
 			$this->_view = (strlen(trim($_GET['profile'])) == 0 ? 'general' : $_GET['profile']);
 
 			// Build statistics
@@ -37,7 +37,7 @@
 				}
 			}
 
-			return parent::build();
+			return parent::build($context);
 		}
 
 		protected function buildJump(XMLElement $wrapper) {
@@ -85,6 +85,12 @@
 				__('Memory Usage'),
 				'?profile=memory-usage' . $this->_query_string,
 				($this->_view == 'memory-usage')
+			));
+
+			$list->appendChild($this->buildJumpItem(
+				__('XSLT Execution'),
+				'?profile=xslt' . $this->_query_string,
+				($this->_view == 'xslt')
 			));
 
 			if(is_object(Symphony::Database())){
@@ -226,6 +232,20 @@
 
 					$row->appendChild(new XMLElement('td', number_format($tt, 4) . ' s from ' . count($te) . ' extensions and ' . $tq . ' ' . ($tq == 1 ? 'query' : 'queries')));
 				}
+			}
+
+			else if ($this->_view == 'xslt') {
+				$file = Frontend::Page()->Proc->getProfiling();
+				$content = ($file && General::checkFileReadable($file)) ? file_get_contents($file) : null;
+				if (!$content) {
+					$content = __('Error');
+				} else {
+					General::deleteFile($file);
+				}
+				$row = new XMLElement('tr');
+				$row->appendChild(new XMLElement('th', __('Results')));
+				$row->appendChild((new XMLElement('td'))->appendChild(new XMLElement('pre', $content)));
+				$table->appendChild($row);
 			}
 
 			else if ($this->_records = $this->_records[$this->_view]) {
